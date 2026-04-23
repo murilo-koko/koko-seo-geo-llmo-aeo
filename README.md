@@ -77,6 +77,8 @@ Or use the included installer:
 bash install.sh
 ```
 
+License: [MIT](./LICENSE)
+
 ## Example Prompts
 
 Audit a live URL:
@@ -143,6 +145,16 @@ Remove the skill symlink:
 
 ```bash
 bash uninstall.sh
+```
+
+Regenerate the README previews from demo JSON:
+
+```bash
+python3 scripts/render_readme_previews.py \
+  --audit-json references/demo-koko-blog.json \
+  --compare-json references/demo-compare.json \
+  --audit-output assets/readme-audit-preview.svg \
+  --compare-output assets/readme-compare-preview.svg
 ```
 
 ## Included References

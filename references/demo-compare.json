@@ -1,0 +1,96 @@
+{
+  "mode": "compare-pages",
+  "url_count": 3,
+  "pages": [
+    {
+      "url": "https://koko.ag/",
+      "status_code": 200,
+      "page_type": "landing-page",
+      "title": "Koko · Agência de Marketing Inteligente",
+      "word_count": 1355,
+      "top_terms": [
+        "instagram",
+        "koko",
+        "marketing",
+        "performance",
+        "social",
+        "tecnologia"
+      ]
+    },
+    {
+      "url": "https://koko.ag/servicos",
+      "status_code": 200,
+      "page_type": "landing-page",
+      "title": "Serviços · Performance, Branding, Social, Tech, Educação, Web · Koko",
+      "word_count": 377,
+      "top_terms": [
+        "koko",
+        "serviços",
+        "educação",
+        "performance",
+        "branding",
+        "tecnologia"
+      ]
+    },
+    {
+      "url": "https://koko.ag/blog/grafico-de-retencao-reels-instagram",
+      "status_code": 200,
+      "page_type": "blog",
+      "title": "O gráfico de retenção explica por que seu Reel bombou (ou fracassou) · Diário Koko",
+      "word_count": 1525,
+      "top_terms": [
+        "vídeo",
+        "retenção",
+        "gráfico",
+        "como",
+        "reel",
+        "conteúdo"
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "left_url": "https://koko.ag/",
+      "right_url": "https://koko.ag/servicos",
+      "left_page_type": "landing-page",
+      "right_page_type": "landing-page",
+      "overlap_score": 0.17,
+      "risk": "low",
+      "shared_terms": [
+        "educação",
+        "koko",
+        "performance",
+        "social",
+        "tecnologia"
+      ],
+      "note": "The overlap is limited and unlikely to cause serious cannibalization."
+    },
+    {
+      "left_url": "https://koko.ag/",
+      "right_url": "https://koko.ag/blog/grafico-de-retencao-reels-instagram",
+      "left_page_type": "landing-page",
+      "right_page_type": "blog",
+      "overlap_score": 0.06,
+      "risk": "low",
+      "shared_terms": [
+        "conteúdo"
+      ],
+      "note": "The overlap is limited and unlikely to cause serious cannibalization."
+    },
+    {
+      "left_url": "https://koko.ag/servicos",
+      "right_url": "https://koko.ag/blog/grafico-de-retencao-reels-instagram",
+      "left_page_type": "landing-page",
+      "right_page_type": "blog",
+      "overlap_score": 0.02,
+      "risk": "low",
+      "shared_terms": [],
+      "note": "The overlap is limited and unlikely to cause serious cannibalization."
+    }
+  ],
+  "summary": {
+    "high_risk_pairs": 0,
+    "medium_or_higher_pairs": 0,
+    "recommendation": "The set is reasonably differentiated, but medium-overlap pairs still deserve review."
+  }
+}
