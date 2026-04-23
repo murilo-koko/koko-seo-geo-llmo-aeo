@@ -1,0 +1,34 @@
+{
+  "url": "https://koko.ag/blog/grafico-de-retencao-reels-instagram",
+  "page_type": "blog",
+  "audit_mode": "url-evidence",
+  "overall_score": 82,
+  "scores": {
+    "seo": 76,
+    "geo": 84,
+    "aeo": 88,
+    "llmo": 79
+  },
+  "confidence": "medium",
+  "verdict": "This is a strong answer-first article with excellent educational packaging, but its mobile speed still leaks more performance than the content quality deserves.",
+  "top_wins": [
+    "The article answers a real user question clearly and structures the explanation in a reusable way."
+  ],
+  "top_blockers": [
+    "Mobile performance is still too slow for a content asset this strong."
+  ],
+  "next_actions": [
+    {
+      "priority": "P1",
+      "action": "Improve JS efficiency and above-the-fold loading on mobile."
+    },
+    {
+      "priority": "P1",
+      "action": "Add a short takeaway or FAQ block near the end."
+    },
+    {
+      "priority": "P2",
+      "action": "Convert dense sections into more quoteable diagnostic statements."
+    }
+  ]
+}

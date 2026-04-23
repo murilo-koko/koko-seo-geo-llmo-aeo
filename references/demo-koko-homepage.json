@@ -1,0 +1,34 @@
+{
+  "url": "https://koko.ag/",
+  "page_type": "landing-page",
+  "audit_mode": "url-evidence",
+  "overall_score": 74,
+  "scores": {
+    "seo": 68,
+    "geo": 78,
+    "aeo": 74,
+    "llmo": 76
+  },
+  "confidence": "medium",
+  "verdict": "The homepage has strong semantic framing and useful answer structure, but mobile performance is weak enough to suppress a better overall score.",
+  "top_wins": [
+    "The page explains the business clearly and exposes rich semantic signals."
+  ],
+  "top_blockers": [
+    "Mobile speed is too weak for the quality of the offer being presented."
+  ],
+  "next_actions": [
+    {
+      "priority": "P1",
+      "action": "Reduce unused JavaScript and improve above-the-fold delivery."
+    },
+    {
+      "priority": "P1",
+      "action": "Add a tighter one-sentence audience and offer definition near the hero."
+    },
+    {
+      "priority": "P2",
+      "action": "Turn core differentiators into short standalone proof blocks."
+    }
+  ]
+}
