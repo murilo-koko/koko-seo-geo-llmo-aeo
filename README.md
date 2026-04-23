@@ -18,6 +18,8 @@ It can:
 - audit a live URL
 - review a draft article before publishing
 - review a landing page copy
+- compare 2 to 5 URLs for overlap and cannibalization-lite risk
+- run a sitewide-lite audit from a homepage or root URL
 - generate a compact scorecard
 - generate a public scorecard for screenshots or social posts
 - generate a carousel-ready summary for Instagram
@@ -39,6 +41,12 @@ It returns:
 - a diagnostic breakdown
 - a priority roadmap
 - an optional Public Scorecard
+
+It can also return:
+
+- page-to-page overlap analysis
+- risk labels for cannibalization-lite review
+- lightweight sitewide summaries across a small internal page sample
 
 ## Installation
 
@@ -71,12 +79,24 @@ Review a draft:
 Use $koko-seo-geo-llmo-aeo to review this draft before publication. Score SEO, GEO, AEO, and LLMO, then give me the top fixes.
 ```
 
+Compare multiple pages:
+
+```text
+Use $koko-seo-geo-llmo-aeo to compare these URLs and tell me whether they overlap too much. I want overlap score, risk label, and what each page should own.
+```
+
+Run a sitewide-lite audit:
+
+```text
+Use $koko-seo-geo-llmo-aeo to run a sitewide-lite audit from this homepage. Crawl a small set of internal pages and tell me the biggest structural issues first.
+```
+
 ## Repository Structure
 
 - [SKILL.md](./SKILL.md): the main skill behavior and workflow
 - [agents/openai.yaml](./agents/openai.yaml): Codex skill metadata
 - [references/](./references/): rubric, demos, prompts, output contract, launch kit
-- [scripts/](./scripts/): helper scripts for score computation, shareable output, and smoke tests
+- [scripts/](./scripts/): helper scripts for score computation, shareable output, compare mode, sitewide-lite, and smoke tests
 - [assets/](./assets/): skill icons
 
 ## Real Smoke Test
@@ -88,6 +108,18 @@ uv run python scripts/smoke_test_url.py https://koko.ag/blog/grafico-de-retencao
 ```
 
 This collects render-audit and Lighthouse evidence and returns JSON.
+
+Compare multiple URLs directly:
+
+```bash
+python3 scripts/compare_pages.py https://example.com/page-a https://example.com/page-b
+```
+
+Run a sitewide-lite sample crawl:
+
+```bash
+python3 scripts/sitewide_lite_audit.py https://example.com --max-pages 5
+```
 
 ## Included References
 

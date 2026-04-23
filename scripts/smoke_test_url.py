@@ -1,14 +1,86 @@
 #!/usr/bin/env python3
-"""Run a real URL smoke test using the repo's audit tooling."""
+"""Run a real URL smoke test using only public repo helpers."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
+from urllib.parse import urlparse
 
-from server.integrations.seo_audit.lighthouse import run_lighthouse
-from server.integrations.seo_audit.service import run_render_audit
+from lite_audit_utils import fetch_snapshot
+
+
+def run_lighthouse(url: str, preset: str = "mobile", timeout_s: int = 120) -> dict:
+    """Collect a minimal Lighthouse performance snapshot via npx."""
+    cmd = [
+        "npx",
+        "-y",
+        "lighthouse",
+        url,
+        "--output=json",
+        "--output-path=stdout",
+        "--only-categories=performance",
+        "--chrome-flags=--headless=new --no-sandbox",
+        "--quiet",
+    ]
+    if preset == "desktop":
+        cmd.append("--preset=desktop")
+
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_s)
+    except subprocess.TimeoutExpired:
+        return {"preset": preset, "performance_score": None, "metrics": {}, "top_opportunities": [], "error": "Lighthouse timeout"}
+    except FileNotFoundError:
+        return {"preset": preset, "performance_score": None, "metrics": {}, "top_opportunities": [], "error": "npx not found"}
+
+    if proc.returncode != 0:
+        return {
+            "preset": preset,
+            "performance_score": None,
+            "metrics": {},
+            "top_opportunities": [],
+            "error": f"Lighthouse exit {proc.returncode}",
+        }
+
+    report = json.loads(proc.stdout)
+    audits = report.get("audits", {})
+    categories = report.get("categories", {})
+    performance = categories.get("performance", {}).get("score")
+    performance_score = round(performance * 100) if isinstance(performance, (int, float)) else None
+
+    def _numeric(audit_key: str) -> float | None:
+        value = audits.get(audit_key, {}).get("numericValue")
+        return value if isinstance(value, (int, float)) else None
+
+    opportunities = []
+    for audit_id, audit in audits.items():
+        details = audit.get("details", {})
+        savings = details.get("overallSavingsMs")
+        if details.get("type") == "opportunity" and savings and savings > 50:
+            opportunities.append(
+                {
+                    "id": audit_id,
+                    "title": audit.get("title", audit_id),
+                    "savings_ms": savings,
+                }
+            )
+    opportunities.sort(key=lambda item: item["savings_ms"], reverse=True)
+
+    return {
+        "preset": preset,
+        "performance_score": performance_score,
+        "metrics": {
+            "lcp_s": (_numeric("largest-contentful-paint") or 0) / 1000 if _numeric("largest-contentful-paint") is not None else None,
+            "fcp_s": (_numeric("first-contentful-paint") or 0) / 1000 if _numeric("first-contentful-paint") is not None else None,
+            "tbt_ms": _numeric("total-blocking-time"),
+            "cls": _numeric("cumulative-layout-shift"),
+            "inp_ms": _numeric("interaction-to-next-paint") or _numeric("max-potential-fid"),
+        },
+        "top_opportunities": opportunities[:3],
+        "error": None,
+    }
 
 
 def main() -> int:
@@ -24,32 +96,40 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    render = run_render_audit(args.url)
+    snapshot = fetch_snapshot(args.url)
     lighthouse = run_lighthouse(args.url, preset=args.preset, timeout_s=120)
+    parsed = urlparse(snapshot.final_url)
+    internal_links = 0
+    external_links = 0
+    for link in snapshot.links:
+        target = urlparse(link if "://" in link else "")
+        if target.netloc and target.netloc != parsed.netloc:
+            external_links += 1
+        else:
+            internal_links += 1
 
     payload = {
         "url": args.url,
-        "final_url": render.final_url,
-        "status_code": render.status_code,
-        "ssr_words": render.ssr_words,
-        "rendered_words": render.rendered_words,
-        "flags": render.flags,
-        "structured_data_types": [item.get("@type") for item in render.structured_data],
+        "final_url": snapshot.final_url,
+        "status_code": snapshot.status_code,
+        "word_count": snapshot.word_count,
+        "page_type": snapshot.page_type,
+        "title": snapshot.title,
+        "meta_description_present": bool(snapshot.meta_description),
+        "canonical": snapshot.canonical,
+        "structured_data_count": snapshot.schema_count,
         "images": {
-            "total": render.images.total,
-            "missing_alt": render.images.missing_alt,
+            "total": None,
+            "missing_alt": None,
         },
         "links": {
-            "internal": render.links.internal,
-            "external": render.links.external,
+            "internal": internal_links,
+            "external": external_links,
         },
-        "lighthouse": {
-            "preset": args.preset,
-            "performance_score": lighthouse.performance_score,
-            "metrics": lighthouse.metrics,
-            "top_opportunities": lighthouse.opportunities[:3],
-            "error": lighthouse.error,
-        },
+        "top_terms": snapshot.top_terms,
+        "h1_count": snapshot.h1_count,
+        "h1_texts": snapshot.h1_texts,
+        "lighthouse": lighthouse,
     }
     json.dump(payload, sys.stdout, indent=2, ensure_ascii=False)
     sys.stdout.write("\n")

@@ -25,6 +25,8 @@ Default input types:
 - a live URL
 - a draft article pasted into chat
 - landing page copy pasted into chat
+- 2 to 5 URLs for comparison
+- a homepage URL for a sitewide-lite pass
 
 Default expectation:
 
@@ -37,6 +39,8 @@ Preferred prompts:
 - "Audit this URL for SEO, GEO, AEO, and LLMO"
 - "Score this landing page and tell me what is leaking"
 - "Review this blog draft before I publish it"
+- "Compare these pages and tell me if they risk cannibalization"
+- "Run a sitewide-lite audit from this homepage"
 
 Read [references/public-prompts.md](references/public-prompts.md) when you need polished prompts for end users, demos, or marketplace copy.
 
@@ -51,7 +55,15 @@ Pick the strongest audit mode available:
    - `seo_render_audit(url)`
    - `seo_cwv_audit(url, preset="mobile")`
 
-2. `content-only`
+2. `compare-pages`
+   Use when the user provides 2 to 5 URLs and wants to understand overlap, differentiation, or cannibalization-lite risk.
+   Read [references/compare-mode.md](references/compare-mode.md) before writing the final answer.
+
+3. `sitewide-lite`
+   Use when the user wants a first-pass website audit from a homepage or root URL.
+   Read [references/sitewide-lite.md](references/sitewide-lite.md) before writing the final answer.
+
+4. `content-only`
    Use when the user shares draft copy, markdown, or notes without a live URL.
    Score only what can be inferred from the content itself and reduce confidence accordingly.
 
@@ -66,6 +78,10 @@ Collect evidence in this order:
 3. Gather technical evidence from the page or tools.
 4. Gather content evidence from headings, body copy, FAQs, schema, and linking patterns.
 5. Only then assign scores.
+
+For `compare-pages`, collect evidence for each page first, then compare intent, overlap, and differentiation.
+
+For `sitewide-lite`, inspect a small set of internal pages and prioritize the biggest structural issues over completeness.
 
 Do not invent:
 
@@ -124,6 +140,18 @@ Always include:
 - top wins
 - top blockers
 - next actions
+
+For `compare-pages`, also include:
+
+- overlap score by page pair
+- risk label by page pair
+- what each page should own
+
+For `sitewide-lite`, also include:
+
+- pages sampled
+- sitewide top issues
+- pages that need attention first
 
 When the user wants something shareable, also include the short `Public Scorecard` variant defined in the output contract.
 If the user wants a format suitable for Instagram, screenshots, or a carousel, read [references/shareable-output.md](references/shareable-output.md) and shape the output accordingly.
