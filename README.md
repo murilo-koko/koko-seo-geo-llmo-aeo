@@ -1,153 +1,224 @@
+# =========================================================
+# KOKO SKILL SERIES
+# por Murilo Souza · koko.ag
+# Inteligência aplicada, empacotada para uso real.
+# =========================================================
+
 # Koko SEO GEO LLMO AEO
 
-A public Codex skill that audits a landing page, blog post, or draft content and scores it across four dimensions:
+Skill pública para auditar landing pages, posts de blog e rascunhos de conteúdo com foco em quatro pilares:
 
 - SEO
 - GEO
 - AEO
 - LLMO
 
-The goal is simple: paste a URL or draft, receive a professional scorecard, understand what is strong, what is leaking, and what to fix first.
+A proposta é simples: você cola uma URL ou um conteúdo e recebe uma leitura clara do que está forte, do que está vazando e do que vale corrigir primeiro.
 
-![Audit preview](./assets/readme-audit-preview.svg)
+![Preview da auditoria](./assets/readme-audit-preview.svg)
 
-## What It Does
+## Visão Geral
 
-This skill is designed for non-technical use by default.
+`koko-seo-geo-llmo-aeo` foi criada para transformar uma auditoria que normalmente seria difusa, técnica demais ou difícil de compartilhar em um pacote utilizável.
 
-It can:
+Em vez de só listar problemas, a skill organiza a análise como entrega de operação:
 
-- audit a live URL
-- review a draft article before publishing
-- review a landing page copy
-- compare 2 to 5 URLs for overlap and cannibalization-lite risk
-- run a sitewide-lite audit from a homepage or root URL
-- generate a compact scorecard
-- generate a public scorecard for screenshots or social posts
-- generate a carousel-ready summary for Instagram
+- scorecard
+- diagnóstico
+- prioridades
+- versão pública para screenshot ou conteúdo social
 
-It does not require Search Console, Google Analytics, or API setup to be useful.
+Ela funciona bem sem integrações externas e foi pensada para uso real, não só para demonstração.
 
-It also includes lightweight AI search readiness checks such as:
+## O Que a Skill Faz
 
-- `llms.txt` presence
-- quoteable block density
-- FAQ-style structure
-- list and schema support for retrieval
+Esta skill pode:
 
-## Scoring Model
+- auditar uma URL ao vivo
+- revisar um post antes de publicar
+- revisar a copy de uma landing page
+- comparar 2 a 5 URLs para detectar sobreposição e risco de canibalização
+- rodar uma auditoria `sitewide-lite` a partir de uma homepage
+- gerar um `Audit Snapshot`
+- gerar um `Public Scorecard`
+- gerar um resumo em formato de carrossel para Instagram
+- verificar sinais leves de AI search readiness, como `llms.txt`, blocos citáveis, FAQ e estrutura de listas
 
-The skill scores pages from `0-100` across:
+![Preview do compare mode](./assets/readme-compare-preview.svg)
 
-- `SEO`: crawlability, structure, metadata, internal linking, schema, and performance
-- `GEO`: generative engine optimization, including entity clarity and topical completeness
-- `AEO`: answer engine optimization, including answer-first formatting and snippet readiness
-- `LLMO`: large language model optimization, including chunkability, quoteability, and retrieval clarity
+## Para Quem Ela Foi Feita
 
-It returns:
+Essa skill foi feita para:
 
-- an Audit Snapshot
-- a diagnostic breakdown
-- a priority roadmap
-- an optional Public Scorecard
+- pessoas de marketing que precisam de direção prática
+- founders e operadores que querem entender o estado de uma página rapidamente
+- criadores de conteúdo que querem revisar um artigo antes de publicar
+- times que querem avaliar uma página sem depender de Search Console ou GA
+- pessoas que precisam de uma entrega fácil de compartilhar
 
-It can also return:
+## Entradas Aceitas
 
-- page-to-page overlap analysis
-- risk labels for cannibalization-lite review
-- lightweight sitewide summaries across a small internal page sample
-- AI citation readiness signals
+Você pode usar a skill com:
 
-![Compare mode preview](./assets/readme-compare-preview.svg)
+- uma URL
+- um rascunho colado no chat
+- a copy de uma landing page
+- 2 a 5 URLs para comparação
+- uma homepage para rodar `sitewide-lite`
 
-## Installation
+## Saídas Esperadas
 
-Clone this repository and link it into your Codex skills directory:
+Por padrão, a skill devolve:
+
+- `Audit Snapshot`
+- notas para SEO, GEO, AEO e LLMO
+- leitura do que está forte
+- leitura do que está vazando
+- prioridades de correção
+
+Dependendo do pedido, ela também pode devolver:
+
+- `Public Scorecard`
+- `Carousel Summary`
+- comparação entre páginas
+- risco de canibalização-lite
+- leitura de AI citation readiness
+- resumo `sitewide-lite`
+
+## Como Instalar Localmente
+
+Clone o repositório:
 
 ```bash
 git clone https://github.com/murilo-koko/koko-seo-geo-llmo-aeo.git
-ln -s /absolute/path/to/koko-seo-geo-llmo-aeo ~/.codex/skills/koko-seo-geo-llmo-aeo
+cd koko-seo-geo-llmo-aeo
 ```
 
-Restart Codex after linking the skill.
+Depois escolha um dos caminhos abaixo.
 
-Or use the included installer:
+Instalação manual:
+
+```bash
+ln -s /caminho/absoluto/para/koko-seo-geo-llmo-aeo ~/.codex/skills/koko-seo-geo-llmo-aeo
+```
+
+Instalação com script:
 
 ```bash
 bash install.sh
 ```
 
-License: [MIT](./LICENSE)
+Depois disso, reinicie o Codex para a skill ser carregada.
 
-## Example Prompts
-
-Audit a live URL:
-
-```text
-Use $koko-seo-geo-llmo-aeo to audit https://example.com for SEO, GEO, AEO, and LLMO. Return the Audit Snapshot, top leaks, priority roadmap, and Public Scorecard.
-```
-
-Review a landing page:
-
-```text
-Use $koko-seo-geo-llmo-aeo to score this landing page and tell me what is leaking first.
-```
-
-Review a draft:
-
-```text
-Use $koko-seo-geo-llmo-aeo to review this draft before publication. Score SEO, GEO, AEO, and LLMO, then give me the top fixes.
-```
-
-Compare multiple pages:
-
-```text
-Use $koko-seo-geo-llmo-aeo to compare these URLs and tell me whether they overlap too much. I want overlap score, risk label, and what each page should own.
-```
-
-Run a sitewide-lite audit:
-
-```text
-Use $koko-seo-geo-llmo-aeo to run a sitewide-lite audit from this homepage. Crawl a small set of internal pages and tell me the biggest structural issues first.
-```
-
-## Repository Structure
-
-- [SKILL.md](./SKILL.md): the main skill behavior and workflow
-- [agents/openai.yaml](./agents/openai.yaml): Codex skill metadata
-- [references/](./references/): rubric, demos, prompts, output contract, launch kit
-- [scripts/](./scripts/): helper scripts for score computation, shareable output, compare mode, sitewide-lite, and smoke tests
-- [assets/](./assets/): skill icons
-
-## Real Smoke Test
-
-If you are working from the repo and want to test the URL-evidence layer directly:
-
-```bash
-uv run python scripts/smoke_test_url.py https://koko.ag/blog/grafico-de-retencao-reels-instagram
-```
-
-This collects render-audit and Lighthouse evidence and returns JSON.
-
-Compare multiple URLs directly:
-
-```bash
-python3 scripts/compare_pages.py https://example.com/page-a https://example.com/page-b
-```
-
-Run a sitewide-lite sample crawl:
-
-```bash
-python3 scripts/sitewide_lite_audit.py https://example.com --max-pages 5
-```
-
-Remove the skill symlink:
+Para remover o link:
 
 ```bash
 bash uninstall.sh
 ```
 
-Regenerate the README previews from demo JSON:
+## Como Usar
+
+Depois de reiniciar o Codex, abra uma nova thread e invoque a skill com:
+
+```text
+$koko-seo-geo-llmo-aeo
+```
+
+Ou use a skill diretamente dentro do prompt.
+
+Exemplo:
+
+```text
+Use $koko-seo-geo-llmo-aeo to audit https://example.com for SEO, GEO, AEO, and LLMO.
+```
+
+## Prompts Recomendados
+
+Auditar uma URL:
+
+```text
+Use $koko-seo-geo-llmo-aeo to audit https://example.com for SEO, GEO, AEO, and LLMO. Return the Audit Snapshot, top leaks, priority roadmap, and Public Scorecard.
+```
+
+Revisar uma landing page:
+
+```text
+Use $koko-seo-geo-llmo-aeo to score this landing page and tell me what is leaking first.
+```
+
+Revisar um rascunho:
+
+```text
+Use $koko-seo-geo-llmo-aeo to review this draft before publication. Score SEO, GEO, AEO, and LLMO, then give me the top fixes.
+```
+
+Comparar páginas:
+
+```text
+Use $koko-seo-geo-llmo-aeo to compare these URLs and tell me whether they overlap too much. I want overlap score, risk label, and what each page should own.
+```
+
+Rodar `sitewide-lite`:
+
+```text
+Use $koko-seo-geo-llmo-aeo to run a sitewide-lite audit from this homepage. Crawl a small set of internal pages and tell me the biggest structural issues first.
+```
+
+Gerar saída para Instagram:
+
+```text
+Use $koko-seo-geo-llmo-aeo to audit this page and also generate a Public Scorecard plus a carousel-ready summary.
+```
+
+## Tutorial Rápido
+
+### 1. Teste simples por URL
+
+Cole este prompt:
+
+```text
+Use $koko-seo-geo-llmo-aeo to audit https://koko.ag/ for SEO, GEO, AEO, and LLMO.
+```
+
+### 2. Teste de comparação
+
+Cole este prompt:
+
+```text
+Use $koko-seo-geo-llmo-aeo to compare https://koko.ag/ and https://koko.ag/servicos and tell me whether they overlap too much.
+```
+
+### 3. Teste de auditoria leve de site
+
+Cole este prompt:
+
+```text
+Use $koko-seo-geo-llmo-aeo to run a sitewide-lite audit from https://koko.ag/.
+```
+
+## Exemplos
+
+### Teste técnico por terminal
+
+Se quiser validar a base técnica da skill fora do app:
+
+```bash
+uv run python scripts/smoke_test_url.py https://koko.ag/blog/grafico-de-retencao-reels-instagram
+```
+
+Comparação por terminal:
+
+```bash
+python3 scripts/compare_pages.py https://example.com/page-a https://example.com/page-b
+```
+
+Auditoria `sitewide-lite` por terminal:
+
+```bash
+python3 scripts/sitewide_lite_audit.py https://example.com --max-pages 5
+```
+
+Regenerar previews do README a partir dos demos:
 
 ```bash
 python3 scripts/render_readme_previews.py \
@@ -157,16 +228,43 @@ python3 scripts/render_readme_previews.py \
   --compare-output assets/readme-compare-preview.svg
 ```
 
-## Included References
+## Diferenciais
 
-This repo already includes:
+Os principais diferenciais desta skill hoje são:
 
-- public prompts in PT-BR and English
-- demo audits
-- score calibration examples
-- Instagram launch copy
-- AI search readiness guidance
+- funciona bem sem API externa
+- já nasce com saída compartilhável
+- trata SEO, GEO, AEO e LLMO como pacote único
+- já inclui `compare mode`
+- já inclui `sitewide-lite`
+- já inclui sinais de `AI citation readiness`
+- foi embalada para uso real, não só para benchmarking técnico
 
-## Status
+## Limites e Guardrails
 
-This is the first public release of the skill and is intentionally optimized for a no-integration workflow.
+Essa skill não deve:
+
+- fingir precisão quando faltam insumos
+- inventar métricas de Search Console, GA ou SERP
+- depender de integrações para ser útil
+- vender score como verdade absoluta
+
+Ela foi desenhada para:
+
+- orientar decisão
+- apontar vazamentos
+- priorizar correções
+
+Não foi desenhada para substituir por completo uma operação avançada com dados proprietários.
+
+## Sobre o Autor
+
+Criado por [Murilo Souza](https://www.linkedin.com/in/murilo-koko/).
+
+- Instagram: [@murilo.sn](https://www.instagram.com/murilo.sn/)
+- LinkedIn: [murilo-koko](https://www.linkedin.com/in/murilo-koko/)
+- Koko: [koko.ag](https://koko.ag/)
+
+## Licença
+
+Este repositório usa licença [MIT](./LICENSE).
