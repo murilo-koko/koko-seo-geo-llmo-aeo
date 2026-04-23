@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from html.parser import HTMLParser
 from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
 
 import json
 import re
@@ -37,6 +38,11 @@ class PageSnapshot:
     canonical: str
     h1_count: int
     h1_texts: list[str]
+    h2_count: int
+    h3_count: int
+    list_count: int
+    short_paragraph_count: int
+    faq_hint: bool
     schema_count: int
     links: list[str]
     word_count: int
@@ -54,13 +60,22 @@ class AuditHTMLParser(HTMLParser):
         self.canonical = ""
         self.h1_count = 0
         self.h1_texts: list[str] = []
+        self.h2_count = 0
+        self.h3_count = 0
+        self.list_count = 0
         self.links: list[str] = []
         self.schema_count = 0
         self._in_title = False
         self._in_h1 = False
+        self._in_h2 = False
+        self._in_h3 = False
+        self._in_p = False
         self._ignore_depth = 0
         self._text_chunks: list[str] = []
         self._current_h1: list[str] = []
+        self._paragraphs: list[str] = []
+        self._current_paragraph: list[str] = []
+        self._faq_hint = False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attr_map = dict(attrs)
@@ -72,6 +87,17 @@ class AuditHTMLParser(HTMLParser):
             self._in_h1 = True
             self.h1_count += 1
             self._current_h1 = []
+        if tag == "h2":
+            self._in_h2 = True
+            self.h2_count += 1
+        if tag == "h3":
+            self._in_h3 = True
+            self.h3_count += 1
+        if tag == "p":
+            self._in_p = True
+            self._current_paragraph = []
+        if tag in {"ul", "ol"}:
+            self.list_count += 1
         if tag == "meta" and attr_map.get("name", "").lower() == "description":
             self.meta_description = (attr_map.get("content") or "").strip()
         if tag == "link" and attr_map.get("rel", "").lower() == "canonical":
@@ -95,6 +121,16 @@ class AuditHTMLParser(HTMLParser):
             if text:
                 self.h1_texts.append(text)
             self._current_h1 = []
+        if tag == "h2":
+            self._in_h2 = False
+        if tag == "h3":
+            self._in_h3 = False
+        if tag == "p":
+            self._in_p = False
+            paragraph = " ".join(self._current_paragraph).strip()
+            if paragraph:
+                self._paragraphs.append(paragraph)
+            self._current_paragraph = []
 
     def handle_data(self, data: str) -> None:
         if self._ignore_depth > 0:
@@ -106,11 +142,25 @@ class AuditHTMLParser(HTMLParser):
             self.title = f"{self.title} {text}".strip()
         if self._in_h1:
             self._current_h1.append(text)
+        if self._in_h2 or self._in_h3:
+            lowered = text.lower()
+            if any(token in lowered for token in ("faq", "pergunta", "question", "perguntas")):
+                self._faq_hint = True
+        if self._in_p:
+            self._current_paragraph.append(text)
         self._text_chunks.append(text)
 
     @property
     def visible_text(self) -> str:
         return " ".join(self._text_chunks)
+
+    @property
+    def short_paragraph_count(self) -> int:
+        return sum(1 for paragraph in self._paragraphs if 40 <= len(paragraph) <= 240)
+
+    @property
+    def faq_hint(self) -> bool:
+        return self._faq_hint
 
 
 def _tokenize(text: str) -> list[str]:
@@ -167,6 +217,11 @@ def fetch_snapshot(url: str, timeout: int = 20) -> PageSnapshot:
         canonical=parser.canonical,
         h1_count=parser.h1_count,
         h1_texts=parser.h1_texts,
+        h2_count=parser.h2_count,
+        h3_count=parser.h3_count,
+        list_count=parser.list_count,
+        short_paragraph_count=parser.short_paragraph_count,
+        faq_hint=parser.faq_hint,
         schema_count=parser.schema_count,
         links=parser.links,
         word_count=word_count,
@@ -204,3 +259,104 @@ def jaccard_similarity(left: list[str], right: list[str]) -> float:
 
 def dump_json(payload: dict) -> str:
     return json.dumps(payload, indent=2, ensure_ascii=False)
+
+
+def fetch_llms_txt_status(url: str, timeout: int = 10) -> dict:
+    """Check whether llms.txt exists for the given site's origin."""
+    parsed = urlparse(url)
+    llms_url = f"{parsed.scheme}://{parsed.netloc}/llms.txt"
+    request = Request(llms_url, headers={"User-Agent": USER_AGENT})
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            content = response.read().decode("utf-8", errors="replace")
+            lines = [line.strip() for line in content.splitlines() if line.strip()]
+            return {
+                "url": llms_url,
+                "present": True,
+                "status_code": getattr(response, "status", 200),
+                "preview": lines[:5],
+            }
+    except HTTPError as exc:
+        return {
+            "url": llms_url,
+            "present": False,
+            "status_code": exc.code,
+            "preview": [],
+        }
+    except URLError:
+        return {
+            "url": llms_url,
+            "present": False,
+            "status_code": 0,
+            "preview": [],
+        }
+
+
+def ai_citation_readiness(snapshot: PageSnapshot, llms_status: dict | None = None) -> dict:
+    """Heuristic score for AI citation friendliness without external APIs."""
+    score = 0
+    signals: list[str] = []
+    issues: list[str] = []
+
+    if snapshot.h1_count == 1:
+        score += 10
+        signals.append("Exactly one H1 supports clean passage framing.")
+    else:
+        issues.append("Heading structure is weaker because the page does not have exactly one H1.")
+
+    if snapshot.word_count >= 350:
+        score += 15
+        signals.append("The page has enough textual substance to support answer extraction.")
+    else:
+        issues.append("The page is relatively thin for rich answer extraction.")
+
+    if snapshot.schema_count > 0:
+        score += 15
+        signals.append("Structured data improves machine-readable context.")
+    else:
+        issues.append("No visible structured data was detected.")
+
+    if snapshot.short_paragraph_count >= 3:
+        score += 15
+        signals.append("Multiple short paragraphs look quoteable and retrieval-friendly.")
+    else:
+        issues.append("There are few short standalone blocks that can be quoted cleanly.")
+
+    if snapshot.list_count > 0:
+        score += 10
+        signals.append("List structure helps chunkability and snippet extraction.")
+    else:
+        issues.append("The page would benefit from more list-style answer packaging.")
+
+    if snapshot.faq_hint:
+        score += 10
+        signals.append("FAQ-style framing helps answer engine readability.")
+    else:
+        issues.append("No FAQ-style heading pattern was detected.")
+
+    if snapshot.meta_description:
+        score += 10
+        signals.append("A meta description exists and helps summarize the page intent.")
+    else:
+        issues.append("Missing meta description weakens summary clarity.")
+
+    if snapshot.canonical:
+        score += 5
+        signals.append("Canonical tag is present.")
+    else:
+        issues.append("Missing canonical can weaken URL clarity.")
+
+    if llms_status and llms_status.get("present"):
+        score += 10
+        signals.append("llms.txt is present, which is a positive AI accessibility signal.")
+    else:
+        issues.append("llms.txt was not found at the site root.")
+
+    score = max(0, min(score, 100))
+    level = "strong" if score >= 75 else "mixed" if score >= 50 else "weak"
+    return {
+        "score": score,
+        "level": level,
+        "signals": signals[:5],
+        "issues": issues[:5],
+    }

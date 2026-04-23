@@ -9,7 +9,7 @@ import subprocess
 import sys
 from urllib.parse import urlparse
 
-from lite_audit_utils import fetch_snapshot
+from lite_audit_utils import ai_citation_readiness, fetch_llms_txt_status, fetch_snapshot
 
 
 def run_lighthouse(url: str, preset: str = "mobile", timeout_s: int = 120) -> dict:
@@ -98,6 +98,8 @@ def main() -> int:
 
     snapshot = fetch_snapshot(args.url)
     lighthouse = run_lighthouse(args.url, preset=args.preset, timeout_s=120)
+    llms_status = fetch_llms_txt_status(snapshot.final_url)
+    ai_readiness = ai_citation_readiness(snapshot, llms_status)
     parsed = urlparse(snapshot.final_url)
     internal_links = 0
     external_links = 0
@@ -129,6 +131,13 @@ def main() -> int:
         "top_terms": snapshot.top_terms,
         "h1_count": snapshot.h1_count,
         "h1_texts": snapshot.h1_texts,
+        "h2_count": snapshot.h2_count,
+        "h3_count": snapshot.h3_count,
+        "list_count": snapshot.list_count,
+        "short_paragraph_count": snapshot.short_paragraph_count,
+        "faq_hint": snapshot.faq_hint,
+        "llms_txt": llms_status,
+        "ai_citation_readiness": ai_readiness,
         "lighthouse": lighthouse,
     }
     json.dump(payload, sys.stdout, indent=2, ensure_ascii=False)

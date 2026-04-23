@@ -14,6 +14,8 @@ Use this skill to evaluate a live URL or draft content for four dimensions:
 - AEO: answer engine optimization, including answer-first formatting, snippet readiness, FAQs, and extraction clarity
 - LLMO: large language model optimization, including chunkability, quoteability, retrieval anchors, and semantic clarity
 
+Read [references/ai-search-readiness.md](references/ai-search-readiness.md) when you want to emphasize AI citation readiness, `llms.txt`, or passage-level reuse.
+
 This skill is designed to produce a professional scorecard rather than vague commentary. It should prefer real evidence over intuition, separate hard findings from model judgment, and always explain why a score was assigned.
 
 ## Quick Start

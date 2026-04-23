@@ -8,7 +8,12 @@ import json
 import sys
 from collections import deque
 
-from lite_audit_utils import fetch_snapshot, normalize_internal_links
+from lite_audit_utils import (
+    ai_citation_readiness,
+    fetch_llms_txt_status,
+    fetch_snapshot,
+    normalize_internal_links,
+)
 
 
 def main() -> int:
@@ -28,6 +33,7 @@ def main() -> int:
     queue = deque([args.url])
     visited: set[str] = set()
     pages = []
+    llms_status = fetch_llms_txt_status(args.url)
 
     while queue and len(pages) < max_pages:
         url = queue.popleft()
@@ -56,6 +62,7 @@ def main() -> int:
                 "h1_count": snapshot.h1_count,
                 "meta_description_present": bool(snapshot.meta_description),
                 "schema_count": snapshot.schema_count,
+                "ai_citation_readiness": ai_citation_readiness(snapshot, llms_status),
                 "top_terms": snapshot.top_terms[:8],
             }
         )
@@ -68,6 +75,11 @@ def main() -> int:
     thin_pages = [page["url"] for page in pages if page.get("word_count", 0) and page.get("word_count", 0) < 250]
     missing_meta = [page["url"] for page in pages if page.get("status_code") == 200 and not page.get("meta_description_present")]
     weak_structure = [page["url"] for page in pages if page.get("status_code") == 200 and page.get("h1_count", 0) != 1]
+    weak_ai_readiness = [
+        page["url"]
+        for page in pages
+        if page.get("status_code") == 200 and page.get("ai_citation_readiness", {}).get("score", 0) < 55
+    ]
 
     top_issues = []
     if broken_pages:
@@ -78,6 +90,10 @@ def main() -> int:
         top_issues.append(f"{len(missing_meta)} page(s) are missing a meta description.")
     if weak_structure:
         top_issues.append(f"{len(weak_structure)} page(s) do not have exactly one H1.")
+    if weak_ai_readiness:
+        top_issues.append(f"{len(weak_ai_readiness)} page(s) have weak AI citation readiness signals.")
+    if not llms_status.get("present"):
+        top_issues.append("llms.txt was not found at the site root.")
     if not top_issues:
         top_issues.append("No major structural issues were detected in the sampled pages.")
 
@@ -90,6 +106,8 @@ def main() -> int:
             "thin_pages": thin_pages,
             "missing_meta_description": missing_meta,
             "weak_h1_structure": weak_structure,
+            "weak_ai_citation_readiness": weak_ai_readiness,
+            "llms_txt": llms_status,
             "top_issues": top_issues,
         },
         "pages": pages,

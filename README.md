@@ -9,6 +9,8 @@ A public Codex skill that audits a landing page, blog post, or draft content and
 
 The goal is simple: paste a URL or draft, receive a professional scorecard, understand what is strong, what is leaking, and what to fix first.
 
+![Audit preview](./assets/readme-audit-preview.svg)
+
 ## What It Does
 
 This skill is designed for non-technical use by default.
@@ -25,6 +27,13 @@ It can:
 - generate a carousel-ready summary for Instagram
 
 It does not require Search Console, Google Analytics, or API setup to be useful.
+
+It also includes lightweight AI search readiness checks such as:
+
+- `llms.txt` presence
+- quoteable block density
+- FAQ-style structure
+- list and schema support for retrieval
 
 ## Scoring Model
 
@@ -47,6 +56,9 @@ It can also return:
 - page-to-page overlap analysis
 - risk labels for cannibalization-lite review
 - lightweight sitewide summaries across a small internal page sample
+- AI citation readiness signals
+
+![Compare mode preview](./assets/readme-compare-preview.svg)
 
 ## Installation
 
@@ -58,6 +70,12 @@ ln -s /absolute/path/to/koko-seo-geo-llmo-aeo ~/.codex/skills/koko-seo-geo-llmo-
 ```
 
 Restart Codex after linking the skill.
+
+Or use the included installer:
+
+```bash
+bash install.sh
+```
 
 ## Example Prompts
 
@@ -121,6 +139,12 @@ Run a sitewide-lite sample crawl:
 python3 scripts/sitewide_lite_audit.py https://example.com --max-pages 5
 ```
 
+Remove the skill symlink:
+
+```bash
+bash uninstall.sh
+```
+
 ## Included References
 
 This repo already includes:
@@ -129,6 +153,7 @@ This repo already includes:
 - demo audits
 - score calibration examples
 - Instagram launch copy
+- AI search readiness guidance
 
 ## Status
 
